@@ -1,0 +1,45 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+global proc xmeshAboutUI()
+{
+	int $edge = 12;
+	int $pad = 8;
+	int $rowPad = 5;
+
+	string $version = `pluginInfo -q -version "XMesh"`;
+	string $attributions = `getXMeshAttributions`;
+
+	string $form = `setParent -q`;
+
+	formLayout -e -width 640 -height 450 $form;
+
+	string $titleText = `text -l "XMesh MY"`;
+	string $mainTextBox = `scrollField -ww true -ed false -tx $attributions`;
+	string $okButton = `button -l "OK" -width 70 -c "layoutDialog -dismiss \"OK\""`;
+
+	string $versionRow = `rowLayout -nc 2`;
+	text -l "Version:";
+	textField -ed false -tx $version;
+
+	formLayout -edit
+		-af $titleText "top" $edge
+		-af $titleText "left" $edge
+
+		-ac $versionRow "top" $rowPad $titleText
+		-af $versionRow "left" $edge
+
+		-af $okButton "bottom" $edge
+		-af $okButton "right" $edge
+
+		-ac $mainTextBox "top" $pad $versionRow
+		-ac $mainTextBox "bottom" $edge $okButton
+		-af $mainTextBox "left" $edge
+		-af $mainTextBox "right" $edge
+	$form;
+}
+
+global proc showXMeshAbout()
+{
+	layoutDialog -title "About XMesh" -ui "xmeshAboutUI";
+}

@@ -1,0 +1,45 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+////////////////////////////////////
+// File Dialog UI Controls for setting XMesh parameters on load
+///////////////////////////////////
+
+global proc xmeshLoadDialog_setupParams(string $parent)
+{
+	setParent $parent;
+	columnLayout -adj true;
+	frameLayout -l "Viewport" -cll true -mh 5;
+	columnLayout;
+
+	string $displayOptionList[] = {"Mesh", "Bounding Box", "Vertices", "Faces"};
+	optionMenuGrp -l "Display: " -cc xmeshLoadDialog_displayStyleCB ddl_displayStyle;
+	string $option;
+	for ($option in $displayOptionList)
+	{
+		menuItem -l $option;
+	}
+
+	floatSliderGrp -l "Percent: " -field true -minValue 0 -maxValue 100 -value 5 -enable false flt_displayPercent;
+}
+
+global proc xmeshLoadDialog_commitParams(string $parent)
+{
+	global int $xmesh_displayStyle;
+	$xmesh_displayStyle = `optionMenuGrp -q -sl ddl_displayStyle`;
+	global float $xmesh_displayPercent;
+	$xmesh_displayPercent = `floatSliderGrp -q -v flt_displayPercent`;
+}
+
+global proc xmeshLoadDialog_displayStyleCB()
+{
+	$displayStyle = `optionMenuGrp -q -v ddl_displayStyle`;
+	if ($displayStyle == "Mesh" || $displayStyle == "Bounding Box")
+	{
+		floatSliderGrp -e -enable false flt_displayPercent;
+	}
+	else
+	{
+		floatSliderGrp -e -enable true flt_displayPercent;
+	}
+}

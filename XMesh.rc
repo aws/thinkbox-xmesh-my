@@ -1,0 +1,116 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Canada) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENC)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_CAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_LICENSEFINDER DIALOGEX 0, 0, 200, 234
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Maya XMesh Saver Licensing Error"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_LICENSEFINDER_CONTENTFRAME,"Static",SS_BLACKFRAME,7,7,186,203
+    LTEXT           "Maya XMesh Saver was unable to obtain a license.",IDC_STATIC,10,15,162,8
+    CONTROL         "License Server",IDC_RADIO_SERVER,"Button",BS_AUTORADIOBUTTON | WS_GROUP,10,107,63,10
+    CONTROL         "Node-Locked License File",IDC_RADIO_FILE,"Button",BS_AUTORADIOBUTTON,10,168,95,10
+    LTEXT           "Hostname or IP:",IDC_STATIC,20,120,53,8
+    EDITTEXT        IDC_EDIT_SERVERNAME,76,117,114,14,ES_AUTOHSCROLL
+    CONTROL         "Server is using a specific port (for firewalls)",IDC_CHECK_USESERVERPORT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,133,154,10
+    LTEXT           "Port:",IDC_STATIC,56,149,17,8
+    EDITTEXT        IDC_EDIT_SERVERPORT,76,146,101,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_SERVERPORT,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,178,146,11,14
+    LTEXT           "Path:",IDC_STATIC,20,181,18,8
+    EDITTEXT        IDC_EDIT_FILEPATH,39,178,151,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BUTTON_FILEBROWSE,155,193,35,14
+    DEFPUSHBUTTON   "Accept",IDOK,91,213,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,143,213,50,14
+    LTEXT           "",IDC_STATIC_REASON,10,29,180,73
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_LICENSEFINDER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 193
+        VERTGUIDE, 10
+        VERTGUIDE, 20
+        VERTGUIDE, 30
+        VERTGUIDE, 190
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 227
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (Canada) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

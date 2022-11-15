@@ -1,0 +1,193 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+////////////////////////////////////
+// XMesh (Maya) initialization commands
+///////////////////////////////////
+
+
+// Appends a new menu item to a given parent menu, which executes a given command.
+// Example: Adding the XMesh Loader menu item to the Create menu, tagging it with 'XMesh'.
+// Usage: append_to_menu( "XMesh Loader", "mainCreateMenu", "python(\"import createXMeshLoader; createXMeshLoader.createXMeshLoader();\");", "XMesh" );
+//
+// @param $label The label of the new menu item to appear in the menu.
+// @param $parent The Maya label for the parent menu.
+// @param $command The command to be executed when the menu item is clicked.
+// @param $tag A unique identifier to attach to the menu item, which allows you to identify it in code later.
+proc append_to_menu( string $label, string $parent, string $command, string $tag ){
+	// VALIDATION: Check if the parent menu exists.
+	int $parentExists = `menu -q -exists $parent`;
+	if( $parentExists == 0 ){ return; }
+
+	// VALIDATION: Ensure our new menu item isn't already in the menu.
+	string $createMenuItems[] = `menu -query -itemArray mainCreateMenu`;	// Get all menu items under the Create menu.
+	int $numItems = size( $createMenuItems );
+	for( $i = 0; $i < $numItems; ++$i ){
+		string $existingLabel = `menuItem -query -label $createMenuItems[$i]`;	// Get the docTag of the current menu item.
+		if( $existingLabel == $label ){
+			return;
+		}
+	}
+
+	// We only reach this point if our checks passed.
+	menuItem -divider true -parent $parent -docTag $tag;
+	menuItem -label $label -parent $parent -docTag $tag -command $command;
+}
+
+
+// Given a shelf label, returns a 1 if the shelf exists, or a 0 otherwise.
+// Usage: int $exists = shelf_exists("XMesh");
+//
+// @param $label The name of the shelf to test for.
+// @return 1 if the shelf exists, 0 otherwise.
+proc int shelf_exists( string $label ){
+	int $result = `shelfLayout -exists $label`;
+	return $result;
+}
+
+
+// Removes all buttons from the given shelf.
+// Usage: clear_shelf( "XMesh" );
+//
+// @param $label The name of the shelf from which to remove buttons.
+proc clear_shelf( string $label ){
+	string $shelfChildren[] = `shelfLayout -q -childArray $label`;
+	for($child in $shelfChildren){
+		deleteUI $child;
+	}
+}
+
+
+// Creates a new shelf with the given label. Includes a check to ensure the shelf name doesn't already exist.
+// Usage: int $result = create_shelf("XMesh");
+//
+// @param $label The displayed name of the new shelf.
+// @return true if the shelf is created, false if it already exists.
+proc int create_shelf( string $label ){
+	if( !shelf_exists( $label ) ){
+		addNewShelfTab $label;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+// Adds a button to the given shelf, or overwrites the button if it already exists (match is based on equivalent docTag).
+// Usage: create_shelf_button("XMesh", "Create XMesh Loader", "Create a new XMesh Loader node.", "python(\\\"import createXMeshLoader;reload(createXMeshLoader);createXMeshLoader.createXMeshLoader();\\\");", "XMeshLoader_icon.png", "XMeshLoader_doctag");
+//
+// @param $parent The name/label of the shelf to add the button to.
+// @param $label The label for the command, used in Maya for managing the shelf.
+// @param $annotation Tooltip / status line text on mouseover.
+// @param $command The command to run when the button is clicked.
+// @param $image1 An image/icon to use for the button.
+// @param $doctag A unique label to attach to each button so it can be found later.
+// @return The fully qualified name of the button within Maya.
+proc string create_shelf_button( string $parent, string $label, string $annotation, string $command, string $image1, string $doctag ){
+	string $commandSuffix = "-parent \"" + $parent + "\" -label \"" + $label + "\" -annotation \"" + $annotation + "\" -command \"" + $command + "\" -docTag \"" + $doctag + "\"";
+	if( size( $image1 ) > 0 ){
+		$commandSuffix += " -image1 \"" + $image1 + "\"";
+	}
+
+	// Check to see if the button already exists. Return early if it does to avoid creating duplicates.
+	string $shelfChildren[] = `shelfLayout -q -childArray $parent`;
+	for($child in $shelfChildren){
+		string $childTag = `shelfButton -query -docTag $child`;
+		if( $childTag == $doctag ){
+			string $melCommand = "shelfButton -edit " + $commandSuffix + " " + $child;
+			eval( $melCommand );
+			return $child;
+		}
+	}
+
+	// If we didn't drop out early, then add the button to the shelf
+	string $melCommand = "shelfButton " + $commandSuffix;
+	string $buttonName = eval( $melCommand );
+	return $buttonName;
+}
+
+
+// Reutrns the name/label of the currently'selected shelf tab.
+// @return A string containing the name of the current shelf.
+proc string get_current_shelf(){
+	global string $gShelfTopLevel;
+	string $shelfName = `tabLayout -q -selectTab $gShelfTopLevel`;
+	return $shelfName;
+}
+
+
+// Switches the selected shelf in the interface to the specified label.
+// Usage: switch_to_shelf("XMesh");
+//
+// @param $label The label of the shelf to select.
+proc switch_to_shelf( string $label ){
+	global string $gShelfTopLevel;
+	tabLayout -e -selectTab $label $gShelfTopLevel;
+}
+
+
+
+// Creates the XMesh Loader menu item in the Create menu.
+// Wrapped in its own proc to reduce size of XMeshInit() and reduce unnecessary state in that general method.
+proc add_xmesh_loader_menu_item(){
+	ModCreateMenu mainCreateMenu;	// Forces Maya to build the Create menu, so we append to it instead of overriding it.
+
+	string $label = "XMesh Loader...";
+	string $parent = "mainCreateMenu";
+	string $command = "python(\"import createXMeshLoader; createXMeshLoader.createXMeshLoader();\");";
+	string $xmeshTag = "XMesh";		// Always create items with a unique tag so they can be identified and cleaned up later.
+
+	append_to_menu( $label, $parent, $command, $xmeshTag );
+}
+
+
+
+// Creates the XMesh shelf and buttons.
+proc create_xmesh_shelf(){
+	string $XMESH_SHELF_LABEL = "XMesh";
+
+	string $SHELF_BUTTON_LABEL_XMESH_LOADER		= "XMesh Loader";
+	string $SHELF_BUTTON_LABEL_XMESH_SAVER		= "XMesh Saver";
+
+	string $SHELF_BUTTON_ANNOTATION_XMESH_LOADER	= "XMesh Loader: Create an XMesh Loader";
+	string $SHELF_BUTTON_ANNOTATION_XMESH_SAVER		= "XMesh Saver: Show XMesh Saver dialog";
+
+	string $SHELF_BUTTON_COMMAND_XMESH_LOADER	= "python(\\\"import createXMeshLoader; createXMeshLoader.createXMeshLoader();\\\");";
+	string $SHELF_BUTTON_COMMAND_XMESH_SAVER	= "python(\\\"import showXMeshSaver; showXMeshSaver.showXMeshSaver();\\\");";
+
+	string $SHELF_BUTTON_IMAGE_XMESH_LOADER		= "XMeshLoader_icon.png";
+	string $SHELF_BUTTON_IMAGE_XMESH_SAVER		= "XMeshSaver_icon.png";
+
+	string $SHELF_BUTTON_DOCTAG_XMESH_LOADER	= "XMeshLoader_doctag";
+	string $SHELF_BUTTON_DOCTAG_XMESH_SAVER		= "XMeshSaver_doctag";
+
+
+	string $currentShelf = get_current_shelf();
+	if( shelf_exists( $XMESH_SHELF_LABEL ) ){
+		clear_shelf( $XMESH_SHELF_LABEL );
+	} else {
+		create_shelf( $XMESH_SHELF_LABEL );
+	}
+
+	create_shelf_button( 	$XMESH_SHELF_LABEL,
+							$SHELF_BUTTON_LABEL_XMESH_LOADER,
+							$SHELF_BUTTON_ANNOTATION_XMESH_LOADER,
+							$SHELF_BUTTON_COMMAND_XMESH_LOADER,
+							$SHELF_BUTTON_IMAGE_XMESH_LOADER,
+							$SHELF_BUTTON_DOCTAG_XMESH_LOADER );
+	create_shelf_button( 	$XMESH_SHELF_LABEL,
+							$SHELF_BUTTON_LABEL_XMESH_SAVER,
+							$SHELF_BUTTON_ANNOTATION_XMESH_SAVER,
+							$SHELF_BUTTON_COMMAND_XMESH_SAVER,
+							$SHELF_BUTTON_IMAGE_XMESH_SAVER,
+							$SHELF_BUTTON_DOCTAG_XMESH_SAVER );
+
+	switch_to_shelf( $currentShelf );	// Switch back to original shelf.
+}
+
+
+// Initialization code for the XMesh plugin intended to run when the plugin is loaded.
+global proc XMeshCreateUI(){
+	add_xmesh_loader_menu_item();	// "XMesh Loader" in the Create menu.
+	create_xmesh_shelf();			// "XMesh" shelf tab with buttons for the XMesh functions.
+}

@@ -1,0 +1,320 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+////////////////////////////////////
+// Attribute Editor Template for the sequenceXMesh Node
+///////////////////////////////////
+
+source showXMeshAbout;
+source showXMeshHelp;
+
+global proc AEsequenceXMeshUpdateEnables( string $nodeName )
+{
+	if (`objExists $nodeName`)
+	{
+		int $autoProxyPath = getAttr($nodeName + ".inAutoProxyPath");
+		if (`control -exists SequenceXMeshFileProxySequenceText`)
+			text -edit -enable (!$autoProxyPath) SequenceXMeshFileProxySequenceText;
+		if (`control -exists SequenceXMeshFileProxySequenceTextField`)
+			textField -edit -enable (!$autoProxyPath) SequenceXMeshFileProxySequenceTextField;
+		if (`control -exists SequenceXMeshFileProxySequenceButton`)
+			symbolButton -edit -enable (!$autoProxyPath) SequenceXMeshFileProxySequenceButton;
+
+		int $loadingMode = getAttr($nodeName + ".inLoadingMode");
+		int $loadingSequence = ($loadingMode > 1);
+		int $enablePlaybackGraph = getAttr($nodeName + ".inEnablePlaybackGraph");
+		int $useCustomRange = getAttr($nodeName + ".inUseCustomRange");
+
+		editorTemplate -dimControl $nodeName "inEnablePlaybackGraph" (!$loadingSequence);
+		editorTemplate -dimControl $nodeName "inPlaybackGraph" (!($loadingSequence && $enablePlaybackGraph));
+		editorTemplate -dimControl $nodeName "inFrameOffset" (!$loadingSequence);
+		if (`control -exists SequenceXMeshSyncFrameRangeButton`)
+			button -e -enable $loadingSequence SequenceXMeshSyncFrameRangeButton;
+		editorTemplate -dimControl $nodeName "inUseCustomRange" (!$loadingSequence);
+		editorTemplate -dimControl $nodeName "inCustomRangeStart" (!($loadingSequence && $useCustomRange));
+		editorTemplate -dimControl $nodeName "inCustomRangeEnd" (!($loadingSequence && $useCustomRange));
+		editorTemplate -dimControl $nodeName "inCustomRangeStartClampMode" (!($loadingSequence && $useCustomRange));
+		editorTemplate -dimControl $nodeName "inCustomRangeEndClampMode" (!($loadingSequence && $useCustomRange));
+
+		int $displayStyle = getAttr($nodeName + ".inDisplayStyle");
+		editorTemplate -dimControl $nodeName "inDisplayPercent" (!($displayStyle == 3 || $displayStyle == 4));
+	}
+}
+
+global proc AEsequenceXMeshTemplate( string $nodeName )
+{
+	editorTemplate -beginScrollLayout;
+
+	editorTemplate -beginLayout "Help" -collapse 1;
+		editorTemplate -callCustom "sequenceXMeshCreateVersionLabel" "sequenceXMeshUpdateVersionLabel";
+		editorTemplate -callCustom "sequenceXMeshCreateHelpButton" "sequenceXMeshUpdateHelpButton";
+		editorTemplate -callCustom "sequenceXMeshCreateAboutButton" "sequenceXMeshUpdateAboutButton";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Files" -collapse 0;
+		editorTemplate -callCustom "AEsequenceXMesh_seqPath_new" "AEsequenceXMesh_seqPath_replace" "seqPath";
+		editorTemplate -label "Automatic Proxy Path" -addControl "inAutoProxyPath" "AEsequenceXMeshUpdateEnables";
+		editorTemplate -callCustom "AEsequenceXMesh_seqProxyPath_new" "AEsequenceXMesh_seqProxyPath_replace" "seqProxyPath";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Timing" -collapse 0;
+		editorTemplate -label "Loading Mode:" -addControl "inLoadingMode" "AEsequenceXMeshUpdateEnables";
+		editorTemplate -label "Enable Playback Graph" -addControl "inEnablePlaybackGraph" "AEsequenceXMeshUpdateEnables";
+		editorTemplate -label "Playback Graph:" -addControl "inPlaybackGraph";
+		editorTemplate -label "Frame Offset:" -addControl "inFrameOffset";
+		//
+		editorTemplate -callCustom "sequenceXMeshCreateSyncFrameRangeButton" "sequenceXMeshUpdateSyncFrameRangeButton" "inUseCustomRange";
+		editorTemplate -label "Limit to Custom Range" -addControl "inUseCustomRange" "AEsequenceXMeshUpdateEnables";
+		editorTemplate -label "Range Start:" -addControl "inCustomRangeStart";
+		editorTemplate -label "Range End:" -addControl "inCustomRangeEnd";
+		editorTemplate -label "Range Start Mode:" -addControl "inCustomRangeStartClampMode";
+		editorTemplate -label "Range End Mode:" -addControl "inCustomRangeEndClampMode";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Viewport" -collapse 0;
+		editorTemplate -label "Viewport Source:" -addControl "inViewportSource";
+		editorTemplate -label "Display:" -addControl "inDisplayStyle" "AEsequenceXMeshUpdateEnables";
+		editorTemplate -label "Percent:" -addControl "inDisplayPercent";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Render" -collapse 0;
+		editorTemplate -label "Render Source:" -addControl "inRenderSource";
+	editorTemplate -endLayout;
+
+	//editorTemplate -beginLayout "Unit Settings" -collapse 0;
+	//	editorTemplate -label "Length Unit" -addControl "inLengthUnit";
+	//	editorTemplate -label "Custom Scale" -addControl "inCustomScale";
+	//editorTemplate -endLayout;
+
+	// Unless an attribute is manually supressed, maya will automatically fill in all remaining attributes at the bottom of the attribute editor panel.
+	// This was generated from a call to `listAttr $nodeName`;
+	string $toSuppress[] = {
+		"message", "caching", "frozen", "isHistoricallyInteresting", "nodeState", "binMembership",
+		"hyperLayout", "isCollapsed", "blackBox", "borderConnections", "isHierarchicalConnection",
+		"publishedNodeInfo", "publishedNodeInfo.publishedNode",
+		"publishedNodeInfo.isHierarchicalNode", "publishedNodeInfo.publishedNodeType",
+		"rmbCommand", "templateName", "templatePath", "viewName", "iconName", "viewMode",
+		"templateVersion", "uiTreatment", "customTreatment", "creator", "creationDate",
+		"containerType", "boundingBox", "boundingBoxMin", "boundingBoxMinX", "boundingBoxMinY",
+		"boundingBoxMinZ", "boundingBoxMax", "boundingBoxMaxX", "boundingBoxMaxY",
+		"boundingBoxMaxZ", "boundingBoxSize", "boundingBoxSizeX", "boundingBoxSizeY",
+		"boundingBoxSizeZ", "center", "boundingBoxCenterX", "boundingBoxCenterY",
+		"boundingBoxCenterZ", "matrix", "inverseMatrix", "worldMatrix", "worldInverseMatrix",
+		"parentMatrix", "parentInverseMatrix", "visibility", "intermediateObject", "template",
+		"ghosting", "instObjGroups", "instObjGroups.objectGroups",
+		"instObjGroups.objectGroups.objectGrpCompList", "instObjGroups.objectGroups.objectGroupId",
+		"instObjGroups.objectGroups.objectGrpColor", "objectColorRGB", "objectColorR",
+		"objectColorG", "objectColorB", "wireColorRGB", "wireColorR", "wireColorG", "wireColorB",
+		"useObjectColor", "objectColor", "drawOverride", "overrideDisplayType",
+		"overrideLevelOfDetail", "overrideShading", "overrideTexturing", "overridePlayback",
+		"overrideEnabled", "overrideVisibility", "hideOnPlayback", "overrideRGBColors",
+		"overrideColor", "overrideColorRGB", "overrideColorR", "overrideColorG", "overrideColorB",
+		"lodVisibility", "selectionChildHighlighting", "renderInfo", "identification",
+		"layerRenderable", "layerOverrideColor", "renderLayerInfo",
+		"renderLayerInfo.renderLayerId", "renderLayerInfo.renderLayerRenderable",
+		"renderLayerInfo.renderLayerColor", "ghostingControl", "ghostCustomSteps", "ghostPreSteps",
+		"ghostPostSteps", "ghostStepSize", "ghostFrames", "ghostColorPreA", "ghostColorPre",
+		"ghostColorPreR", "ghostColorPreG", "ghostColorPreB", "ghostColorPostA", "ghostColorPost",
+		"ghostColorPostR", "ghostColorPostG", "ghostColorPostB", "ghostRangeStart",
+		"ghostRangeEnd", "ghostDriver", "hiddenInOutliner", "useOutlinerColor", "outlinerColor",
+		"outlinerColorR", "outlinerColorG", "outlinerColorB", "renderType", "renderVolume",
+		"visibleFraction", "hardwareFogMultiplier", "motionBlur", "visibleInReflections",
+		"visibleInRefractions", "castsShadows", "receiveShadows", "asBackground",
+		"maxVisibilitySamplesOverride", "maxVisibilitySamples", "geometryAntialiasingOverride",
+		"antialiasingLevel", "shadingSamplesOverride", "shadingSamples", "maxShadingSamples",
+		"volumeSamplesOverride", "volumeSamples", "depthJitter", "ignoreSelfShadowing",
+		"primaryVisibility", "referenceObject", "compInstObjGroups",
+		"compInstObjGroups.compObjectGroups",
+		"compInstObjGroups.compObjectGroups.compObjectGrpCompList",
+		"compInstObjGroups.compObjectGroups.compObjectGroupId", "pickTexture", "underWorldObject",
+		"localPosition", "localPositionX", "localPositionY", "localPositionZ", "worldPosition",
+		"worldPosition.worldPositionX", "worldPosition.worldPositionY",
+		"worldPosition.worldPositionZ", "localScale", "localScaleX", "localScaleY", "localScaleZ",
+		"inTime", "inGroupIds" };
+
+	// manually supress each such item
+	for ($value in $toSuppress)
+		editorTemplate -suppress $value;
+
+	editorTemplate -addExtraControls;
+
+	editorTemplate -endScrollLayout;
+}
+
+global proc sequenceXMeshCreateVersionLabel()
+{
+	string $oldParent = `setParent -q`;
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+	string $xmeshVersion = `pluginInfo -q -version "XMesh"`;
+	text ( "Version: " + $xmeshVersion );
+
+	setUITemplate -popTemplate;
+	setParent $oldParent;
+}
+
+global proc sequenceXMeshUpdateVersionLabel()
+{
+}
+
+global proc sequenceXMeshCreateHelpButton()
+{
+	string $oldParent = `setParent -q`;
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+	button -label "Open Online Help" -c "showXMeshHelp";
+
+	setUITemplate -popTemplate;
+	setParent $oldParent;
+}
+
+global proc sequenceXMeshUpdateHelpButton()
+{
+}
+
+global proc sequenceXMeshCreateAboutButton()
+{
+	string $oldParent = `setParent -q`;
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+	button -label "About XMesh" -c "showXMeshAbout";
+
+	setUITemplate -popTemplate;
+	setParent $oldParent;
+}
+
+global proc sequenceXMeshUpdateAboutButton()
+{
+}
+
+global proc sequenceXMeshCreateSyncFrameRangeButton( string $attributeName )
+{
+	string $oldParent = `setParent -q`;
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+	rowLayout -numberOfColumns 2;
+		text -l "";
+		button -label "Sync Frame Range" SequenceXMeshSyncFrameRangeButton;
+	setParent ..;
+
+	setUITemplate -popTemplate;
+	setParent $oldParent;
+
+	sequenceXMeshUpdateSyncFrameRangeButton( $attributeName );
+}
+
+global proc sequenceXMeshUpdateSyncFrameRangeButton( string $attributeName )
+{
+	$nodeName = python("\"" + $attributeName + "\".split(\".\")[0]");
+	button -e -enable true SequenceXMeshSyncFrameRangeButton;
+	button -e -c ("sequenceXMeshSyncFrameRange(\"" + $nodeName + "\");") SequenceXMeshSyncFrameRangeButton;
+}
+
+global proc sequenceXMeshSyncFrameRange( string $nodeName )
+{
+	python("import createXMeshLoader;\ncreateXMeshLoader.syncXMeshFrameRange(\"" + $nodeName + "\");");
+}
+
+global proc AEsequenceXMesh_seqPath_new( string $attributeName )
+{
+	string $oldParent = `setParent -q`;
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+	rowLayout -numberOfColumns 3 -adjustableColumn 2 -columnWidth 3 26;
+		text -label "Render Sequence:";
+		textField -editable false SequenceXMeshFileSequenceTextField;
+		symbolButton -image "navButtonBrowse.png" SequenceXMeshFileSequenceButton;
+	setParent ..;
+
+	setUITemplate -popTemplate;
+
+	setParent $oldParent;
+
+	AEsequenceXMesh_seqPath_replace( $attributeName );
+}
+
+global proc sequenceXMeshLoadFileDialog( string $attributeName )
+{
+	// filemode 1 is a single, existing file
+	string $results[] = `fileDialog2 -caption "Open XMesh File sequence..." -okCaption "Open" -fileFilter ".xmesh Files (*.xmesh)" -fileMode 1`;
+
+	for ($filename in $results)
+	{
+		string $toks[];
+		tokenize $attributeName "." $toks;
+		setAttr ($toks[0] + ".seqPath") -type "string" $filename;
+	}
+}
+
+global proc AEsequenceXMesh_seqPath_replace( string $attributeName )
+{
+	if (`objExists $attributeName`)
+	{
+		symbolButton -e -c ("sequenceXMeshLoadFileDialog(\"" + $attributeName + "\");") SequenceXMeshFileSequenceButton;
+		scriptJob -parent SequenceXMeshFileSequenceTextField -replacePrevious -attributeChange $attributeName ("AEsequenceXMesh_seqPath_update " + $attributeName);
+		AEsequenceXMesh_seqPath_update $attributeName;
+	}
+}
+
+global proc AEsequenceXMesh_seqPath_update( string $attributeName )
+{
+	if (`objExists $attributeName`)
+	{
+		string $sequenceText = `getAttr $attributeName`;
+		textField -e -text $sequenceText SequenceXMeshFileSequenceTextField;
+	}
+}
+
+//proxy
+
+global proc AEsequenceXMesh_seqProxyPath_new( string $attributeName )
+{
+	string $oldParent = `setParent -q`;
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+	rowLayout -numberOfColumns 3 -adjustableColumn 2 -columnWidth 3 26;
+		text -label "Proxy Sequence:" SequenceXMeshFileProxySequenceText;
+		textField -editable false SequenceXMeshFileProxySequenceTextField;
+		symbolButton -image "navButtonBrowse.png" SequenceXMeshFileProxySequenceButton;
+	setParent ..;
+
+	setUITemplate -popTemplate;
+
+	setParent $oldParent;
+
+	AEsequenceXMesh_seqProxyPath_replace( $attributeName );
+}
+
+global proc sequenceXMeshLoadProxyFileDialog( string $attributeName )
+{
+	// filemode 1 is a single, existing file
+	string $results[] = `fileDialog2 -caption "Open XMesh Proxy File sequence..." -okCaption "Open" -fileFilter ".xmesh Files (*.xmesh)" -fileMode 1`;
+
+	for ($filename in $results)
+	{
+		string $toks[];
+		tokenize $attributeName "." $toks;
+		setAttr ($toks[0] + ".seqProxyPath") -type "string" $filename;
+	}
+}
+
+global proc AEsequenceXMesh_seqProxyPath_replace( string $attributeName )
+{
+	if (`objExists $attributeName`)
+	{
+		symbolButton -e -c ("sequenceXMeshLoadProxyFileDialog(\"" + $attributeName + "\");") SequenceXMeshFileProxySequenceButton;
+		scriptJob -parent SequenceXMeshFileProxySequenceTextField -replacePrevious -attributeChange $attributeName ("AEsequenceXMesh_seqProxyPath_update " + $attributeName);
+		AEsequenceXMesh_seqProxyPath_update $attributeName;
+	}
+}
+
+global proc AEsequenceXMesh_seqProxyPath_update( string $attributeName )
+{
+	if (`objExists $attributeName`)
+	{
+		string $sequenceText = `getAttr $attributeName`;
+		textField -e -text $sequenceText SequenceXMeshFileProxySequenceTextField;
+	}
+}

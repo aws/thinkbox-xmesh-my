@@ -1,0 +1,60 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+////////////////////////////////////
+// XMesh (Maya) de-initialization commands
+///////////////////////////////////
+
+
+// Removes menu items in the given menu identified by the given tag.
+// Example: This will remove the XMesh Loader item in the Create menu, if passed mainCreateMenu as $parent.
+// Usage: removeFromMenuByTag( "mainCreateMenu", "XMesh" );
+//
+// @param $parent The Maya label for the parent menu that contains the menu items you wish to remove.
+// @param $tag The unique tag assigned to the menu item when it was created.
+proc removeFromMenuByTag( string $parent, string $tag ){
+	string $menuItems[] = `menu -query -itemArray $parent`;	// Get all menu items under the given parent menu.
+	int $numItems = size( $menuItems );
+
+	for( $i = 0; $i < $numItems; ++$i ){
+		string $doctag = `menuItem -query -docTag $menuItems[$i]`;			// Get the docTag of the current menu item.
+		if( $doctag == $tag ){
+			deleteUI -menuItem $menuItems[$i];						// Remove the menuItem.
+		}
+	}
+}
+
+
+
+// Given a shelf label, returns a 1 if the shelf exists, or a 0 otherwise.
+// Usage: int $exists = shelf_exists("XMesh");
+//
+// @param $label The name of the shelf to test for.
+// @return 1 if the shelf exists, 0 otherwise.
+proc int shelf_exists( string $label ){
+	int $result = `shelfLayout -exists $label`;
+	return $result;
+}
+
+
+proc delete_shelf( string $label ){
+	string $shelfChildren[] = `shelfLayout -q -childArray $label`;
+	for($child in $shelfChildren){
+		deleteUI $child;
+	}
+	deleteUI $label;
+}
+
+
+proc removeFromShelfByLabel( string $shelfLabel ){
+	if( shelf_exists( $shelfLabel ) ){
+		delete_shelf( $shelfLabel );
+	}
+}
+
+
+// Cleans up the UI when our plug-in is unloaded.
+global proc XMeshDeleteUI(){
+	removeFromMenuByTag( "mainCreateMenu", "XMesh" );	// Removes any menu items from the Create menu tagged with "XMesh" (such as XMesh Loader).
+	removeFromShelfByLabel( "XMesh" );					// Removes any buttons within this shelf and deletes the shelf.
+}

@@ -1,0 +1,7 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+global proc showXMeshHelp()
+{
+	launch -web "https://docs.thinkboxsoftware.com/products/xmesh/1.10/1_Documentation/manual/xmesh_my/xmeshmy_index.html";
+}
